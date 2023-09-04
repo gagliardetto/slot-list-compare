@@ -28,8 +28,10 @@ func fileExistsAndIsNotEmpty(path string) bool {
 func main() {
 	var epoch uint64 = 0
 	var rpcEndpoint string
+	var providedPathToFaithfulSlotListFile string
 	flag.Uint64Var(&epoch, "epoch", epoch, "The epoch to fetch blocks for.")
 	flag.StringVar(&rpcEndpoint, "rpc", "", "The RPC endpoint to use.")
+	flag.StringVar(&providedPathToFaithfulSlotListFile, "faithful", "", "The path to the faithful slot list file.")
 	flag.Parse()
 	if rpcEndpoint == "" {
 		panic("rpc endpoint not specified")
@@ -37,12 +39,16 @@ func main() {
 	epochStart, epochStop := CalcEpochLimits(epoch)
 	fmt.Printf("Epoch %d: %d - %d\n", epoch, epochStart, epochStop)
 
-	err := os.MkdirAll("lists/faithful", 0o755)
+	err := os.MkdirAll("lists/solana", 0o755)
 	if err != nil {
-		panic(fmt.Errorf("could not create dir lists/faithful: %w", err))
+		panic(fmt.Errorf("could not create dir lists/solana: %w", err))
 	}
 
 	pathFromFaithful := fmt.Sprintf("lists/faithful/%d.slots.txt", epoch)
+	if providedPathToFaithfulSlotListFile != "" {
+		pathFromFaithful = providedPathToFaithfulSlotListFile
+	}
+	fmt.Printf("Going to compare the list of slots for epoch %d from %s with the list from solana rpc.\n", epoch, mustAbs(pathFromFaithful))
 	pathFromSolana := fmt.Sprintf("lists/solana/%d.slots.txt-solana", epoch)
 
 	if fileExistsAndIsNotEmpty(pathFromFaithful) && fileExistsAndIsNotEmpty(pathFromSolana) {
