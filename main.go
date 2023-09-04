@@ -49,9 +49,13 @@ func main() {
 		pathFromFaithful = providedPathToFaithfulSlotListFile
 	}
 	fmt.Printf("Going to compare the list of slots for epoch %d from %s with the list from solana rpc.\n", epoch, mustAbs(pathFromFaithful))
+	if !fileExistsAndIsNotEmpty(pathFromFaithful) {
+		panic(fmt.Errorf("file %s does not exist or is empty", pathFromFaithful))
+	}
 	pathFromSolana := fmt.Sprintf("lists/solana/%d.slots.txt-solana", epoch)
 
 	if fileExistsAndIsNotEmpty(pathFromFaithful) && fileExistsAndIsNotEmpty(pathFromSolana) {
+		fmt.Printf("Comparing %s with %s\n", mustAbs(pathFromFaithful), mustAbs(pathFromSolana))
 		// compare with list from file:
 		fromFaithful, err := loadBlockListFromFile(pathFromFaithful)
 		if err != nil {
