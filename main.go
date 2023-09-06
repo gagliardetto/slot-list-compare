@@ -66,6 +66,13 @@ func main() {
 			panic(err)
 		}
 
+		fromFaithful = removeIf(fromFaithful, func(block uint64) bool {
+			return CalcEpochForSlot(block) != epoch
+		})
+		fromSolana = removeIf(fromSolana, func(block uint64) bool {
+			return CalcEpochForSlot(block) != epoch
+		})
+
 		compare(fromFaithful, fromSolana)
 		return
 	}
@@ -103,6 +110,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	fromFaithful = removeIf(fromFaithful, func(block uint64) bool {
+		return CalcEpochForSlot(block) != epoch
+	})
+	fromSolana = removeIf(fromSolana, func(block uint64) bool {
+		return CalcEpochForSlot(block) != epoch
+	})
+
 	compare(fromFaithful, fromSolana)
 }
 
@@ -112,6 +127,16 @@ func mustAbs(path string) string {
 		panic(err)
 	}
 	return abs
+}
+
+func removeIf(slice []uint64, remover func(uint64) bool) []uint64 {
+	var out []uint64
+	for _, item := range slice {
+		if !remover(item) {
+			out = append(out, item)
+		}
+	}
+	return out
 }
 
 func compare(fromFaithful []uint64, fromSolana []uint64) {
